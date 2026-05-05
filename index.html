@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Employee Recognition Wall</title>
+
+  <style>
+    body {
+      margin: 0;
+      background: #000;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 80%;
+      animation: fade 0.8s ease-in-out;
+    }
+
+    .message {
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .meta {
+      font-size: 1.2rem;
+      opacity: 0.8;
+    }
+
+    @keyframes fade {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container" id="display">
+  Loading Employee Recognition Messages…
+</div>
+
+<script>
+  const DATA_URL =
+    "https://script.google.com/macros/s/AKfycbywPgB89xihCZL-hwhoeevHUTfNWeKkzBYjrX59fwgBvbXCNDAEus1SAAYgzGfugFq-oA/exec";
+
+  const DISPLAY_TIME = 5000; // 5 seconds
+  const POLL_TIME = 10000;   // 10 seconds
+
+  let recognitions = [];
+  let index = 0;
+
+  async function fetchData() {
+    try {
+      const res = await fetch(DATA_URL + "?t=" + Date.now());
+      const data = await res.json();
+
+      if (JSON.stringify(data) !== JSON.stringify(recognitions)) {
+        recognitions = data;
+        if (index >= recognitions.length) index = 0;
+      }
+    } catch (e) {
+      console.error("Fetch error:", e);
+    }
+  }
+
+  function playNext() {
+    if (recognitions.length === 0) {
+      document.getElementById("display").innerHTML =
+        "Waiting for employee recognitions…";
+      return;
+    }
+
+    const r = recognitions[index];
+
+    document.getElementById("display").innerHTML = `
+      <div class="container">
+        <div class="message">“${r.message}”</div>
+        <div class="meta">
+          — ${r.employee}<br>
+          ${new Date(r.timestamp).toLocaleString()}
+        </div>
+      </div>
+    `;
+
+    index = (index + 1) % recognitions.length;
+    setTimeout(playNext, DISPLAY_TIME);
+  }
+
+  fetchData().then(playNext);
+  setInterval(fetchData, POLL_TIME);
+</script>
+
+</body>
+</html>
