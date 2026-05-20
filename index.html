@@ -20,23 +20,27 @@
     }
 
     /* ✅ NEW HEADER */
-    .header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      background: rgba(0,0,0,0.9);
-      padding: 20px 0;
-      font-size: 2rem;
-      font-weight: bold;
-      text-align: center;
-      z-index: 1000;
-      border-bottom: 1px solid rgba(255,255,255,0.2);
-    }
+   .header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: #fff; /* white background so black logo shows */
+  color: #000; /* text becomes black */
+  padding: 15px 30px;
 
-    .container {
-      max-width: 80%;
-      animation: fade 0.8s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+
+  font-size: 2rem;
+  font-weight: bold;
+
+  z-index: 1000;
+  border-bottom: 1px solid rgba(0,0,0,0.2);
+}
+
 
       /* ✅ Push content below header */
       margin-top: 100px;
@@ -62,8 +66,10 @@
 
 <!-- ✅ HEADER ADDED -->
 <div class="header">
-  Havas Media Employee Recognition Wall
+  <img src="FLW_Logo_Black_RGB.png" alt="Havas Logo" class="logo">
+  <span>Havas Media Employee Recognition Wall</span>
 </div>
+``
 
 <div class="container" id="display">
   Loading Employee Recognition Messages…
