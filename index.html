@@ -122,12 +122,28 @@ async function fetchData() {
 }
 
 /* ✅ SPAWN FLOATING MESSAGE */
+function isOverlapping(x, y, width, height) {
+  for (let msg of activeMessages) {
+    if (
+      x < msg.x + msg.width &&
+      x + width > msg.x &&
+      y < msg.y + msg.height &&
+      y + height > msg.y
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function spawnMessage() {
   if (recognitions.length === 0) return;
 
   const r = recognitions[
     Math.floor(Math.random() * recognitions.length)
   ];
+
+  const display = document.getElementById("display");
 
   const div = document.createElement("div");
   div.className = "floating-message";
@@ -140,21 +156,47 @@ function spawnMessage() {
     </div>
   `;
 
-  /* ✅ RANDOM POSITIONING */
-  const x = Math.random() * 75; 
-  const y = Math.random() * 70;
+  display.appendChild(div);
 
-  div.style.left = x + "%";
-  div.style.top = y + "%";
+  const msgWidth = 420;  // approx width (matches your CSS max-width)
+  const msgHeight = 140; // estimated height
 
-  document.getElementById("display").appendChild(div);
+  let attempts = 0;
+  let maxAttempts = 25;
 
-  /* ✅ AUTO REMOVE */
+  let placed = false;
+  let x, y;
+
+  while (!placed && attempts < maxAttempts) {
+    x = Math.random() * (display.clientWidth - msgWidth);
+    y = Math.random() * (display.clientHeight - msgHeight);
+
+    if (!isOverlapping(x, y, msgWidth, msgHeight)) {
+      placed = true;
+    }
+
+    attempts++;
+  }
+
+  /* ✅ If we failed to find space, remove and skip */
+  if (!placed) {
+    div.remove();
+    return;
+  }
+
+  div.style.left = x + "px";
+  div.style.top = y + "px";
+
+  /* ✅ Track this message */
+  const msgObj = { x, y, width: msgWidth, height: msgHeight, el: div };
+  activeMessages.push(msgObj);
+
+  /* ✅ Remove after animation */
   setTimeout(() => {
     div.remove();
+    activeMessages = activeMessages.filter(m => m.el !== div);
   }, 7000);
 }
-
 /* ✅ CONTINUOUS, RANDOM SPAWN LOOP */
 function startSpawner() {
   const delay = 1000 + Math.random() * 2500;
