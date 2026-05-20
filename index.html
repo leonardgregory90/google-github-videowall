@@ -13,7 +13,7 @@
     overflow: hidden;
   }
 
-  /* ✅ HEADER (STACKED + CENTERED) */
+  /* ✅ HEADER */
   .header {
     position: fixed;
     top: 0;
@@ -25,29 +25,26 @@
     color: #000;
 
     display: flex;
-    flex-direction: column; /* ✅ stack logo + text */
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 6px;
-
-    text-align: center;
 
     z-index: 1000;
     border-bottom: 1px solid rgba(0,0,0,0.2);
   }
 
   .logo {
-    height: 6vh; /* ✅ responsive size */
+    height: 6vh;
     object-fit: contain;
   }
 
   .header span {
     font-size: 1.5rem;
     font-weight: bold;
-    letter-spacing: 0.5px;
   }
 
-  /* ✅ DISPLAY AREA BELOW HEADER */
+  /* ✅ DISPLAY AREA */
   #display {
     position: absolute;
     top: 15vh;
@@ -57,7 +54,7 @@
     overflow: hidden;
   }
 
-  /* ✅ FLOATING MESSAGE STYLE */
+  /* ✅ FLOATING MESSAGE */
   .floating-message {
     position: absolute;
     max-width: 420px;
@@ -69,7 +66,7 @@
     backdrop-filter: blur(8px);
     box-shadow: 0 0 20px rgba(255,255,255,0.1);
 
-    animation: fadeInOut 7s ease forwards;
+    animation: fadeDrift 8s ease-in-out forwards;
   }
 
   .message {
@@ -82,21 +79,34 @@
     opacity: 0.75;
   }
 
-  /* ✅ SMOOTH FADE + SLIGHT FLOAT */
-  @keyframes fadeInOut {
-    0%   { opacity: 0; transform: translateY(25px); }
-    10%  { opacity: 1; transform: translateY(0); }
-    85%  { opacity: 1; }
-    100% { opacity: 0; transform: translateY(-25px); }
+  /* ✅ FADE + DRIFT ANIMATION */
+  @keyframes fadeDrift {
+    0% {
+      opacity: 0;
+      transform: translate(0px, 20px);
+    }
+    10% {
+      opacity: 1;
+    }
+    50% {
+      transform: translate(15px, -10px);
+    }
+    90% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translate(-10px, -30px);
+    }
   }
-
 </style>
 </head>
+
 <body>
 
 <!-- ✅ HEADER -->
 <div class="header">
-  <img src="FLW_Logo_Black_RGB.png" alt="Havas Logo" class="logo">
+  <img src="FLW_Logo_Black_RGB.png" class="logo">
   <span>Media Employee Recognition Wall</span>
 </div>
 
@@ -107,21 +117,23 @@ const DATA_URL =
   "https://script.google.com/macros/s/AKfycbywPgB89xihCZL-hwhoeevHUTfNWeKkzBYjrX59fwgBvbXCNDAEus1SAAYgzGfugFq-oA/exec";
 
 const POLL_TIME = 10000;
+const MAX_MESSAGES = 8;
 
 let recognitions = [];
+let activeMessages = [];
+let lastMessageIndex = -1;
 
 /* ✅ FETCH DATA */
 async function fetchData() {
   try {
     const res = await fetch(DATA_URL + "?t=" + Date.now());
-    const data = await res.json();
-    recognitions = data;
+    recognitions = await res.json();
   } catch (e) {
     console.error("Fetch error:", e);
   }
 }
 
-/* ✅ SPAWN FLOATING MESSAGE */
+/* ✅ OVERLAP CHECK */
 function isOverlapping(x, y, width, height) {
   for (let msg of activeMessages) {
     if (
@@ -136,12 +148,23 @@ function isOverlapping(x, y, width, height) {
   return false;
 }
 
+/* ✅ SPAWN MESSAGE */
 function spawnMessage() {
   if (recognitions.length === 0) return;
+  if (activeMessages.length >= MAX_MESSAGES) return;
 
-  const r = recognitions[
-    Math.floor(Math.random() * recognitions.length)
-  ];
+  /* ✅ Prevent repeat */
+  let index;
+  if (recognitions.length === 1) {
+    index = 0;
+  } else {
+    do {
+      index = Math.floor(Math.random() * recognitions.length);
+    } while (index === lastMessageIndex);
+  }
+
+  lastMessageIndex = index;
+  const r = recognitions[index];
 
   const display = document.getElementById("display");
 
@@ -158,16 +181,14 @@ function spawnMessage() {
 
   display.appendChild(div);
 
-  const msgWidth = 420;  // approx width (matches your CSS max-width)
-  const msgHeight = 140; // estimated height
+  const msgWidth = 420;
+  const msgHeight = 160;
 
   let attempts = 0;
-  let maxAttempts = 25;
-
   let placed = false;
   let x, y;
 
-  while (!placed && attempts < maxAttempts) {
+  while (!placed && attempts < 25) {
     x = Math.random() * (display.clientWidth - msgWidth);
     y = Math.random() * (display.clientHeight - msgHeight);
 
@@ -178,7 +199,6 @@ function spawnMessage() {
     attempts++;
   }
 
-  /* ✅ If we failed to find space, remove and skip */
   if (!placed) {
     div.remove();
     return;
@@ -187,31 +207,32 @@ function spawnMessage() {
   div.style.left = x + "px";
   div.style.top = y + "px";
 
-  /* ✅ Track this message */
   const msgObj = { x, y, width: msgWidth, height: msgHeight, el: div };
   activeMessages.push(msgObj);
 
-  /* ✅ Remove after animation */
   setTimeout(() => {
     div.remove();
     activeMessages = activeMessages.filter(m => m.el !== div);
-  }, 7000);
+  }, 8000);
 }
-/* ✅ CONTINUOUS, RANDOM SPAWN LOOP */
+
+/* ✅ RANDOM BURST SPAWNER */
 function startSpawner() {
-  const delay = 1000 + Math.random() * 2500;
+  const delay = 800 + Math.random() * 2000;
 
   setTimeout(() => {
-    spawnMessage();
+    const burst = Math.random() < 0.35 ? 2 + Math.floor(Math.random() * 2) : 1;
+
+    for (let i = 0; i < burst; i++) {
+      setTimeout(() => spawnMessage(), i * 250);
+    }
+
     startSpawner();
   }, delay);
 }
 
 /* ✅ INIT */
-fetchData().then(() => {
-  startSpawner();
-});
-
+fetchData().then(startSpawner);
 setInterval(fetchData, POLL_TIME);
 </script>
 
