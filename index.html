@@ -10,6 +10,8 @@
       background: #000;
       color: #fff;
       font-family: Arial, sans-serif;
+
+      /* Changed layout slightly */
       display: flex;
       align-items: center;
       justify-content: center;
@@ -17,9 +19,27 @@
       text-align: center;
     }
 
+    /* ✅ NEW HEADER */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(0,0,0,0.9);
+      padding: 20px 0;
+      font-size: 2rem;
+      font-weight: bold;
+      text-align: center;
+      z-index: 1000;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+
     .container {
       max-width: 80%;
       animation: fade 0.8s ease-in-out;
+
+      /* ✅ Push content below header */
+      margin-top: 100px;
     }
 
     .message {
@@ -39,6 +59,11 @@
   </style>
 </head>
 <body>
+
+<!-- ✅ HEADER ADDED -->
+<div class="header">
+  Havas Media Employee Recognition Wall
+</div>
 
 <div class="container" id="display">
   Loading Employee Recognition Messages…
@@ -97,3 +122,4 @@
 
 </body>
 </html>
+``
