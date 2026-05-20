@@ -20,26 +20,30 @@
     }
 
     /* ✅ NEW HEADER */
-   .header {
+.header {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  background: #fff; /* white background so black logo shows */
-  color: #000; /* text becomes black */
+  background: #fff;
+  color: #000;
   padding: 15px 30px;
 
   display: flex;
+  flex-direction: column;   /* ✅ STACK items vertically */
   align-items: center;
   justify-content: center;
-  gap: 20px;
+  gap: 8px; /* spacing between logo + title */
 
   font-size: 2rem;
   font-weight: bold;
 
+  text-align: center;
+
   z-index: 1000;
   border-bottom: 1px solid rgba(0,0,0,0.2);
 }
+``
 
 
       /* ✅ Push content below header */
